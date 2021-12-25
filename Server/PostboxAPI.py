@@ -1,24 +1,10 @@
 from flask import Flask, request
-from os import listdir, stat, path
-
-import json
-import yaml
 
 from Models.Metadata import Metadata
+from Server.Server import Server
 
 app = Flask(__name__)
-
-# Config and Setup
-
-directory = None
-
-def load_config():
-    config = None
-    with open('config.yml', 'r') as stream:
-        config = yaml.safe_load(stream)
-    
-    directory = config['source_directory']
-
+server = Server()
 # Default
 
 @app.route("/")
@@ -67,12 +53,7 @@ def get_server_dir_metadata():
     '''
     Returns: JSON list of file metadata on the server.
     '''
-    file_metadata = []
-
-    for file in listdir(directory):
-        dir_path = path.join(directory, file)
-        metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
-        file_metadata.append(json.dumps(metadata.__dict__))
+    file_metadata = server.get_file_metadata()
 
     if file_metadata.count > 0:
         return file_metadata, 200 # Need to brush up on how Python serializes objects to JSON. 
