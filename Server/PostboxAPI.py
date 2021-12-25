@@ -1,5 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from os import listdir, stat, path
+
+import json
 import yaml
 
 from Models.Metadata import Metadata
@@ -70,10 +72,10 @@ def get_server_dir_metadata():
     for file in listdir(directory):
         dir_path = path.join(directory, file)
         metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
-        file_metadata.append(metadata)
+        file_metadata.append(json.dumps(metadata.__dict__))
 
     if file_metadata.count > 0:
-        return jsonify([Metadata.to_json() for file in file_metadata]), 200 # Need to brush up on how Python serializes objects to JSON. 
+        return file_metadata, 200 # Need to brush up on how Python serializes objects to JSON. 
     else:
         return 204
 
