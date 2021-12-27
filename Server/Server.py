@@ -1,13 +1,18 @@
-from os import listdir, stat, path
 
 import json
 import yaml
+from Helper.DirectoryHandler import DirectoryHandler
 
 from Models.Metadata import Metadata
+
+# Note:
+# In the future it would be more effective to use a package such as jsonpickle to handle complex
+# JSON structures.
 
 class Server():
     def __init__(self):
         self.directory = None
+        self.dir_handler = DirectoryHandler()
         self.load_config()
 
     def load_config(self):
@@ -17,13 +22,13 @@ class Server():
         
         if config != None:
             self.directory = config['source_directory']
-
+    
+    
     def get_file_metadata(self):
-        file_metadata = []
+        return self.dir_handler.get_file_metadata(self.directory)
+    
+    def get_files(self):
+        return self.dir_handler.get_files(self.directory)
 
-        for file in listdir(self.directory):
-            dir_path = path.join(self.directory, file)
-            metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
-            file_metadata.append(json.dumps(metadata.__dict__))
-
-        return file_metadata
+    def get_file(self, filename):
+        return self.dir_handler.get_file(self.directory, filename)

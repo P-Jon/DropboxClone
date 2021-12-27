@@ -1,10 +1,10 @@
 from flask import Flask, request
 
-from Models.Metadata import Metadata
 from Server.Server import Server
 
 app = Flask(__name__)
 server = Server()
+
 # Default
 
 @app.route("/")
@@ -56,28 +56,43 @@ def get_server_dir_metadata():
     file_metadata = server.get_file_metadata()
 
     if file_metadata.count > 0:
-        return file_metadata, 200 # Need to brush up on how Python serializes objects to JSON. 
+        return file_metadata, 200
     else:
         return 204
 
-# Upload Routes
+# Read Routes
+@app.route("/get_directory_files", methods=['GET'])
+def get_directory_files():
+    files = server.get_files()
+    if files != None:
+        return files, 200
+    else:
+        return None, 204
 
+# Upload Routes
 @app.route("/upload_multiple_files", methods=['POST'])
 def upload_multiple_files():
     '''
-    
+    Sending a list of files to the server to update or upload (C)R(U)D to the directory.    
     '''
+    files = request.files.getlist("file[]")
     return "<p> UM Files </p>"
 
 @app.route("/upload_file", methods=['POST'])
 def upload_file():
     '''
-    
+    Sending a file to the server to update or upload (C)R(U)D to the directory.
     '''
     return "<p> Upload File </p>"
 
 # Destroy Routes
+@app.route("/remove_file", methods=['POST'])
+def delete_file():
+    return None
 
+@app.route("/remove_multiple_files", methods='POST')
+def delete_multiple_files():
+    return None
 
 # Error Handling
 @app.errorhandler(404)
