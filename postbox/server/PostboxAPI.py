@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request
 from flask.json import jsonify
 
@@ -17,31 +16,31 @@ def default_route():
 
 @app.route("/validate_directories", methods=["GET", "POST"])
 def validate_directory_contents():
+     ''' 
+     [POST] Expecting data from a list of files
+     Arguments:
+     file_list: Data regarding all files in source directory.
+     [GET] Returns: Format of [[entry, FILESTATE], [entry,FILESTATE], . . .] as to whether it is current or not.
+     '''
+     if request.method == "GET":
+         return "GET INV",200
+     else:
+         return "<p> VD Route </p>",200
+
+@app.route("/validate_file/<path:path>", methods=["GET", "POST"])
+def validate_file_contents(path):
     ''' 
-    [POST] Expecting data from a list of files
+    [POST] 
+    Expecting data from a single file
     Arguments:
-    file_list: Data regarding all files in source directory.
-    [GET] Returns: Format of [[entry, FILESTATE], [entry,FILESTATE], . . .] as to whether it is current or not.
+    file: Data regarding target file in source directory.
+    [GET] 
+    Returns: true if file is current, false if not.
     '''
     if request.method == "GET":
-        return "GET INV",200
+        return "<p> GET </p>"
     else:
-        return "<p> VD Route </p>",200
-
-@app.route("/validate_file/<path:path>", methods=["GET","POST"])
-def validate_file_contents(path):
-   ''' 
-   [POST] 
-   Expecting data from a single file
-   Arguments:
-   file: Data regarding target file in source directory.
-   [GET] 
-   Returns: true if file is current, false if not.
-   '''
-   if request.method == "GET":
-       return "<p> GET </p>"
-   else:
-       return "<p> VF Route </p>"
+        return "<p> VF Route </p>"
 
 # Metadata
 @app.route("/server_dir_metadata", methods=["GET"])
@@ -85,7 +84,7 @@ def upload_file():
 def delete_file(path):
      return None
 
-@app.route("/remove_multiple_files", methods="POST")
+@app.route("/remove_multiple_files", methods=["POST"])
 def delete_multiple_files():
      return None
 
