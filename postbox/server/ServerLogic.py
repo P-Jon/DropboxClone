@@ -9,7 +9,7 @@ from postbox.models.Metadata import Metadata
 
 class PBServer():
     def __init__(self):
-        self.directory = "C:\\ServerFilesystem"
+        self.directory = None
         self.dir_handler = DirectoryHandler()
         self.load_config()
 

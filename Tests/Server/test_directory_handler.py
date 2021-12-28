@@ -1,6 +1,7 @@
 import pytest
 
 import os
+from postbox.models.Metadata import Metadata
 from postbox.helper.DirectoryHandler import DirectoryHandler
 
 dir_prefix = os.getcwd()
@@ -15,3 +16,15 @@ def test_get_metadata():
 
 def test_get_filenames():
     assert dir_handler.list_filenames(directory) == dir_files
+
+# Ensuring the similarity is true, aka files are the same.
+f1 = Metadata("x.txt",0,0)
+f2 = Metadata("x.txt",0,0)
+f3 = Metadata("y.txt",0,1) # Filename isn't evaluated here...
+
+def test_similarity_true():
+    assert dir_handler.detect_change(f1,f2) == True
+
+# Ensuring the similarity is false, aka the files are different.
+def test_similarity_false():
+    assert dir_handler.detect_change(f1,f3) == False
