@@ -1,6 +1,5 @@
 import json
 from os import listdir, path
-
 from postbox.models.Metadata import Metadata
 
 class DirectoryHandler():
@@ -30,8 +29,8 @@ class DirectoryHandler():
         """Endpoint to list filenames on the server."""
         files = []
         for filename in listdir(dir):
-            path = path.join(dir, filename)
-            if path.isfile(path):
+            p = path.join(dir, filename)
+            if path.isfile(p):
                 files.append(filename)
         return files
 
