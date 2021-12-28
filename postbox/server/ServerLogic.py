@@ -1,4 +1,3 @@
-import json
 import yaml
 
 from postbox.helper.DirectoryHandler import DirectoryHandler
@@ -12,7 +11,7 @@ class PBServer():
     def __init__(self):
         self.directory = "C:\\ServerFilesystem"
         self.dir_handler = DirectoryHandler()
-        #self.load_config()
+        self.load_config()
 
     def load_config(self):
         config = None
