@@ -28,3 +28,11 @@ def test_similarity_true():
 # Ensuring the similarity is false, aka the files are different.
 def test_similarity_false():
     assert dir_handler.detect_change(f1,f3) == False
+
+def test_get_file():
+    file = dir_handler.get_file(directory, "file2.txt")
+    assert file[0] == "file2.txt"
+
+def test_get_all_files():
+    files = dir_handler.get_files(directory)
+    assert files[0][0] == "file1.txt"

@@ -27,12 +27,7 @@ class DirectoryHandler():
     # Could just be extra technical debt though...
     def list_filenames(self, dir):
         """Endpoint to list filenames on the server."""
-        files = []
-        for filename in listdir(dir):
-            p = path.join(dir, filename)
-            if path.isfile(p):
-                files.append(filename)
-        return files
+        return listdir(dir)
 
     def detect_change(self, f1, f2):
         '''
@@ -41,10 +36,35 @@ class DirectoryHandler():
         '''
         return f1.get_similarity(f2)
 
-    def get_files(self, dir):
-        return None
+    # Section: Getting and Writing files
+    # Desc:    Actually returning or saving file data
 
     def get_file(self, dir, filename):
-        return None
+        file = None
+        p = path.join(dir, filename)
+        
+        if path.isfile(p):
+            with open(p, "rb") as fp: # Read in Binary mode
+                file = fp.read()
 
-    
+            file = [filename, file]
+
+            return file
+        else:
+            return None
+
+    # Going to grab all the files and then let the API interface handle
+    # transforming it to send.
+    def get_files(self, dir):
+        files = []
+        for filename in listdir(dir):
+                file = self.get_file(dir,filename)
+                if file is not None:
+                    files.append(file)
+        return files
+
+    def write_file(self, dir, file):
+        filename = file.filename
+        with open(path.join(dir, filename), "wb") as fp:
+            fp.write(file.data)
+        return 200    

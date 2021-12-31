@@ -32,3 +32,14 @@ class PBServer():
 
     def get_file(self, filename):
         return self.dir_handler.get_file(self.directory, filename)
+
+    def save_file(self, file):
+        self.dir_handler.write_file(self.directory, file)
+        return 200
+        
+    def save_files(self, files):
+        for file in files:
+            self.save_file(file)
+        return 200
+
+    
