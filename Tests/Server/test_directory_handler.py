@@ -5,7 +5,7 @@ from postbox.models.Metadata import Metadata
 from postbox.helper.DirectoryHandler import DirectoryHandler
 
 dir_prefix = os.getcwd()
-directory = dir_prefix + "\\test_dir"
+directory = dir_prefix + "\\Server\\test_dir"
 dir_handler = DirectoryHandler()
 
 dir_string = "{ \"files\": [ {\"filename\": \"file1.txt\", \"size\": 77, \"last_edit\": 1640464854.159165}, {\"filename\": \"file2.txt\", \"size\": 0, \"last_edit\": 1640464825.9357572}] }"
