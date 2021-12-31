@@ -1,10 +1,10 @@
 from flask import Flask, request
 from flask.json import jsonify
 
-from postbox.server.ServerLogic import PBServer
+from postbox.server.ServerLogic import Server
 
 app = Flask(__name__)
-server = PBServer()
+server = Server()
 
 # Default
 @app.route("/")
