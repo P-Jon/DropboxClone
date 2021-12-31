@@ -70,6 +70,8 @@ def upload_multiple_files():
     Sending a list of files to the server to update or upload (C)R(U)D to the directory.    
     '''
     files = request.files.getlist("file[]")
+    server.save_files(files)
+    #files[0].filename
     return "<p> UM Files </p>", 201
 
 @app.route("/upload_file", methods=["POST"])
