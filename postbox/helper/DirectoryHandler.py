@@ -1,4 +1,6 @@
 import json
+import base64
+
 from os import listdir, path
 from postbox.models.Metadata import Metadata
 
@@ -42,13 +44,14 @@ class DirectoryHandler():
     def get_file(self, dir, filename):
         file = None
         p = path.join(dir, filename)
-        
+
         if path.isfile(p):
             with open(p, "rb") as fp: # Read in Binary mode
                 file = fp.read()
-
-            file = [filename, file]
-
+            print(filename)
+            file = base64.b64encode(file) # Ensuring that files are encoded as expected
+            file = [filename, file.decode('ascii')]
+            print(file)
             return file
         else:
             return None

@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask.json import jsonify
+from flask.wrappers import Response
 
 from postbox.server.ServerLogic import Server
 
@@ -50,7 +51,7 @@ def get_server_dir_metadata():
      '''
      file_metadata = server.get_file_metadata()
      if file_metadata != None:
-         return file_metadata, 200
+         return Response(file_metadata, status=200, mimetype='text/json')
      else:
          return 204
 
@@ -59,7 +60,8 @@ def get_server_dir_metadata():
 def get_directory_files():
     files = server.get_files()
     if files != None:
-        return files, 200
+        print(files)
+        return jsonify({'files':files}), 200
     else:
         return None, 204
 

@@ -1,2 +1,2 @@
-api_addr: 127.0.0.1:5000
+api_addr: http://127.0.0.1:5000/
 source_directory: C:\SourceDirectory
