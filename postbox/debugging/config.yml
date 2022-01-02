@@ -1,1 +1,2 @@
-debug_mode: True
+client_debug_mode: True
+server_debug_mode: True
