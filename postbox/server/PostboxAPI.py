@@ -61,10 +61,16 @@ def get_directory_files():
     files = server.get_files()
     if files != None:
         print(files)
-        return jsonify({'files':files}), 200
+        return Response(files, status=200, mimetype='text/json')
     else:
         return None, 204
 
+@app.route("/get_file/<path:path>", methods=["GET"])
+def get_file(path):
+    file = server.get_file(path)
+    if file != None:
+        return jsonify({'files:':file})
+        
 # Upload Routes
 @app.route("/upload_multiple_files", methods=["POST"])
 def upload_multiple_files():
