@@ -14,11 +14,10 @@ class DirectoryHandler():
 
     def get_file_metadata(self, dir):
         file_metadata = []
-
-        for file in listdir(dir):
-            dir_path = path.join(dir, file)
-            metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
-            file_metadata.append(json.dumps(metadata.__dict__))
+        metadata = self.local_get_file_metadata(dir)
+        
+        for file in metadata:
+            file_metadata.append(json.dumps(file.__dict__))
 
         file_metadata = "{ \"files\": [ "  + ', '.join(file_metadata) + "] }"
         return file_metadata
