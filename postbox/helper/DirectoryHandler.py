@@ -13,9 +13,12 @@ class DirectoryHandler():
         pass
 
     def get_file_metadata(self, dir):
+        '''
+        Get a JSON payload of Metadata objects.
+        '''
         file_metadata = []
         metadata = self.local_get_file_metadata(dir)
-        
+
         for file in metadata:
             file_metadata.append(json.dumps(file.__dict__))
 
@@ -24,6 +27,9 @@ class DirectoryHandler():
 
     # Hacking this in on limited time, not great from a technical debt perspective.
     def local_get_file_metadata(self,dir):
+        '''
+        Get a list of Metadata objects from the local directory
+        '''
         file_metadata = []
         for file in listdir(dir):
             dir_path = path.join(dir, file)
@@ -53,6 +59,9 @@ class DirectoryHandler():
     # Desc:    Actually returning or saving file data
 
     def get_file(self, dir, filename):
+        '''
+        Get file data from directory, returns the filename, file data, access time and last edit time.
+        '''
         file = None
         p = path.join(dir, filename)
 
@@ -68,6 +77,10 @@ class DirectoryHandler():
     # Going to grab all the files and then let the API interface handle
     # transforming it to send.
     def get_files(self, dir):
+        '''
+        Get list of files from directory, returns the filename, file data, access time and last edit time.
+        JSON payload format.
+        '''
         files = []
         for filename in listdir(dir):
                 file = self.get_file(dir,filename)
@@ -76,6 +89,9 @@ class DirectoryHandler():
         return json.dumps({'files':files})
 
     def write_file(self, dir, file):
+        '''
+        Writing file to desired directory
+        '''
         filename = file[0]
         p = path.join(dir, filename)
         with open(p, "wb") as fp:
@@ -90,6 +106,10 @@ class DirectoryHandler():
         return 200    
 
     def write_files(self, dir, files):
+        '''
+        Writing a list of files to the desired directory.
+        Expecting a JSON payload.
+        '''
         files = files.get("files")
         for file in files:
             self.write_file(dir, file)
