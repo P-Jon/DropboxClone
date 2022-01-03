@@ -1,8 +1,7 @@
 from flask import Flask, request
 from flask.json import jsonify
 from flask.wrappers import Response
-
-from postbox.server.ServerLogic import Server
+from postbox.server.ServerRepository import Server
 
 app = Flask(__name__)
 server = Server()
@@ -70,14 +69,14 @@ def get_file(path):
     file = server.get_file(path)
     if file != None:
         return jsonify({'files:':file})
-        
+
 # Upload Routes
 @app.route("/upload_multiple_files", methods=["POST"])
 def upload_multiple_files():
     '''
     Sending a list of files to the server to update or upload (C)R(U)D to the directory.    
     '''
-    files = request.files.getlist("file[]")
+    files = request.get_json()
     server.save_files(files)
     #files[0].filename
     return "<p> UM Files </p>", 201

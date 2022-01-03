@@ -1,7 +1,7 @@
 import json
 import base64
 
-from os import listdir, path
+from os import listdir, path, utime
 from postbox.models.Metadata import Metadata
 
 class DirectoryHandler():
@@ -47,11 +47,9 @@ class DirectoryHandler():
 
         if path.isfile(p):
             with open(p, "rb") as fp: # Read in Binary mode
-                file = fp.read()
-            print(filename)
-            file = base64.b64encode(file) # Ensuring that files are encoded as expected
-            file = [filename, file.decode('ascii')]
-            print(file)
+                file = fp.read() 
+            #file = base64.b64encode(file) # Tried ensuring that files are encoded as expected
+            file = [filename, file.decode('ascii'), path.getatime(p), path.getmtime(p)] # Limitation: Cannot handle files such as PNGs.
             return file
         else:
             return None
@@ -68,9 +66,16 @@ class DirectoryHandler():
 
     def write_file(self, dir, file):
         filename = file[0]
-        with open(path.join(dir, filename), "wb") as fp:
+        p = path.join(dir, filename)
+        with open(p, "wb") as fp:
             f = file[1].encode('ascii')
             fp.write(f)
+        
+        try:
+            utime(p, (file[2],file[3]))
+        except:
+            return 500
+             
         return 200    
 
     def write_files(self, dir, files):

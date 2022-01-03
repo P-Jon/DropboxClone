@@ -10,3 +10,4 @@ class Client():
         self.repository = ClientRepository()
         self.repository.welcome_client()
         self.repository.request_files()
+        self.repository.send_files()

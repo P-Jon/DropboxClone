@@ -45,14 +45,19 @@ class ClientRepository():
         r = requests.get(self.api_addr + "get_directory_files")
         if (r.status_code == 200):
             files_json = r.json()
-            self.logger.msg(f"Files successfully retrieved - {r.status_code}")
+            self.logger.msg(f"Files successfully retrieved: HTTP {r.status_code}")
             self.dir_handler.write_files(self.directory,files_json)
             self.logger.msg("Files written to directory.")
         else:
-            self.logger.msg(f"Fails failed to be retrieved - {r.status_code}")
+            self.logger.msg(f"Fails failed to be retrieved: HTTP {r.status_code}")
 
     def send_files(self):
-        pass
+        files = self.dir_handler.get_files(self.directory)
+        r = requests.post(self.api_addr + "upload_multiple_files", json=files)
+        if (r.status_code == 201):
+            self.logger.msg("Send files was successful")
+        else:
+            self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
 
     def request_file_validation(self):
         pass
