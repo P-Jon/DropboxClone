@@ -1,3 +1,5 @@
+import json
+from postbox.debugging.Logger import Logger
 from postbox.helper.DirectoryHandler import DirectoryHandler
 from postbox.helper.YAMLHandler import YAMLHandler
 from postbox.models.Metadata import Metadata
@@ -16,6 +18,7 @@ class Server():
     def __init__(self):
         self.directory = None
         self.dir_handler = DirectoryHandler()
+        self.logger = Logger()
         self.load_config()
 
     def load_config(self):
@@ -35,10 +38,12 @@ class Server():
         return self.dir_handler.get_file(self.directory, filename)
 
     def save_file(self, file):
+        self.logger.msg(f"Writing file to dir: {self.directory}")
         self.dir_handler.write_file(self.directory, file)
         return 200
 
     def save_files(self, files):
-        for file in files:
-            self.save_file(file)
+        self.logger.msg(f"Saving files...")
+        print(files)
+        self.dir_handler.write_files(self.directory, json.loads(files))
         return 200
