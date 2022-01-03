@@ -1,5 +1,7 @@
 import requests
 
+from postbox.helper.DirectoryHandler import DirectoryHandler
+from postbox.debugging.Logger import Logger
 from postbox.helper.YAMLHandler import YAMLHandler as yh
 
 class ClientRepository():
@@ -13,6 +15,8 @@ class ClientRepository():
         self.directory = None
         self.api_addr = None
         self.config_set = False
+        self.logger = Logger()
+        self.dir_handler = DirectoryHandler()
         self.load_config()
 
     def load_config(self):
@@ -40,9 +44,12 @@ class ClientRepository():
     def request_files(self):
         r = requests.get(self.api_addr + "get_directory_files")
         if (r.status_code == 200):
-            print("woo")
+            files_json = r.json()
+            self.logger.msg(f"Files successfully retrieved - {r.status_code}")
+            self.dir_handler.write_files(self.directory,files_json)
+            self.logger.msg("Files written to directory.")
         else:
-            print("boo")
+            self.logger.msg(f"Fails failed to be retrieved - {r.status_code}")
 
     def send_files(self):
         pass
