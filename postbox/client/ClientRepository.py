@@ -1,8 +1,11 @@
 import requests
 
+from datetime import datetime, timezone
+
 from postbox.helper.DirectoryHandler import DirectoryHandler
 from postbox.debugging.Logger import Logger
 from postbox.helper.YAMLHandler import YAMLHandler as yh
+from postbox.models.Metadata import Metadata
 
 class ClientRepository():
     '''
@@ -25,12 +28,23 @@ class ClientRepository():
         self.api_addr = yaml_handler.get_variable('api_addr')
         self.config_set = True
 
-    # Print out the directory in the CLI
     def present_directory(self):
-        pass
+        '''
+        Print out the directory in the CLI
+        '''
+        files = self.get_client_metadata()
+        print("\n--- CLIENT DIRECTORY ---\n")
+
+        print(" - File - \t\t - Last Modified - \n")
+        for file in files:
+            time = datetime.fromtimestamp(file.last_edit, tz=timezone.utc).strftime('%Y-%m-%d %H:%M')
+            print(f"- {file.filename} \t\t - {time}")
+        print("\n----------------------\n")
     
-    # Welcome the Client and present some CLI
     def welcome_client(self):
+        '''
+        Welcome the Client and present some CLI
+        '''
         print("\n--- POSTBOX SERVICE ---\n")
         if self.config_set == True:
             print("Configuration Found.")
@@ -42,6 +56,9 @@ class ClientRepository():
 
     # https://docs.python-requests.org/en/latest/user/quickstart/#post-a-multipart-encoded-file
     def request_files(self):
+        '''
+        [GET] Requesting files from server to save to client directory.
+        '''
         r = requests.get(self.api_addr + "get_directory_files")
         if (r.status_code == 200):
             files_json = r.json()
@@ -52,6 +69,9 @@ class ClientRepository():
             self.logger.msg(f"Fails failed to be retrieved: HTTP {r.status_code}")
 
     def send_files(self):
+        '''
+        [POST] Send files from client to server to be saved on the server.
+        '''
         files = self.dir_handler.get_files(self.directory)
         r = requests.post(self.api_addr + "upload_multiple_files", json=files)
         if (r.status_code == 201):
@@ -59,8 +79,26 @@ class ClientRepository():
         else:
             self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
 
+    def check_metadata_match(self, cached):
+        '''
+        Checking if the cached metadata matches the current metadata.
+        Returns true if it matches, false if not.
+        '''
+        metadata = self.get_client_metadata()
+
+        for cached_file in cached:
+            for file in metadata:
+                if (cached_file.filename == file.filename):
+                    if (cached_file.get_similarity(file) == False):
+                        return False
+
+        return True
+
     def request_file_validation(self):
         pass
+
+    def get_client_metadata(self):
+        return self.dir_handler.local_get_file_metadata(self.directory)
 
     def get_server_metadata(self):
         pass
