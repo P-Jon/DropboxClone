@@ -64,10 +64,17 @@ class DirectoryHandler():
                 file = self.get_file(dir,filename)
                 if file is not None:
                     files.append(file)
-        return files
+        return json.dumps({'files':files})
 
     def write_file(self, dir, file):
-        filename = file.filename
+        filename = file[0]
         with open(path.join(dir, filename), "wb") as fp:
-            fp.write(file.data)
+            f = file[1].encode('ascii')
+            fp.write(f)
         return 200    
+
+    def write_files(self, dir, files):
+        files = files.get("files")
+        for file in files:
+            self.write_file(dir, file)
+        return 200
