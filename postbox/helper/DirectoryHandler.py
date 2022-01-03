@@ -23,6 +23,15 @@ class DirectoryHandler():
         file_metadata = "{ \"files\": [ "  + ', '.join(file_metadata) + "] }"
         return file_metadata
 
+    # Hacking this in on limited time, not great from a technical debt perspective.
+    def local_get_file_metadata(self,dir):
+        file_metadata = []
+        for file in listdir(dir):
+            dir_path = path.join(dir, file)
+            metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
+            file_metadata.append(metadata)
+        return file_metadata
+
     # This was taken & amended as an example of how people were handling files with flask
     # https://docs.faculty.ai/user-guide/apis/flask_apis/flask_file_upload_download.html
     # Left it in as it could prove useful for lazily grabbing filenames
@@ -37,6 +46,9 @@ class DirectoryHandler():
         Based on file size and last update time.
         '''
         return f1.get_similarity(f2)
+
+    def compare_metadata(self, m1, m2):
+        pass
 
     # Section: Getting and Writing files
     # Desc:    Actually returning or saving file data
