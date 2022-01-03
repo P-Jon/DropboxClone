@@ -10,4 +10,5 @@ To get the packages used in this project, it is advised to use a Python virtual 
     pip install -e .
     pip install -r requirements.txt
 
-
+This was built, tested and run on a Windows 10 machine. Currently, it has not been tested on other operating systems however outside of configured variables in the yaml and tests,
+it should work as intended.
