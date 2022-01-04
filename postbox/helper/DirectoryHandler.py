@@ -1,5 +1,4 @@
 import json
-import base64
 
 from os import listdir, path, utime
 from postbox.models.Metadata import Metadata
@@ -18,23 +17,13 @@ class DirectoryHandler():
         '''
         file_metadata = []
         metadata = self.local_get_file_metadata(dir)
-
-        for file in metadata:
-            file_metadata.append(json.dumps(file.__dict__))
-
-        file_metadata = "{ \"files\": [ "  + ', '.join(file_metadata) + "] }"
-        return file_metadata
-
-    # Hacking this in on limited time, not great from a technical debt perspective.
-    def local_get_file_metadata(self,dir):
-        '''
-        Get a list of Metadata objects from the local directory
-        '''
-        file_metadata = []
         for file in listdir(dir):
             dir_path = path.join(dir, file)
             metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
             file_metadata.append(metadata)
+            file_metadata.append(json.dumps(file.__dict__))
+
+        file_metadata = "{ \"files\": [ "  + ', '.join(file_metadata) + "] }"
         return file_metadata
 
     # This was taken & amended as an example of how people were handling files with flask
@@ -110,7 +99,16 @@ class DirectoryHandler():
         Writing a list of files to the desired directory.
         Expecting a JSON payload.
         '''
+        files = json.loads(files)
         files = files.get("files")
         for file in files:
             self.write_file(dir, file)
         return 200
+
+    def remove_file(self, dir, filename):
+        pass
+
+    def remove_files(self, dir, filenames):
+        filenames = filenames.get("filenames")
+
+        pass
