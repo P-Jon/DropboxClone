@@ -40,9 +40,6 @@ class DirectoryHandler():
         '''
         return f1.get_similarity(f2)
 
-    def compare_metadata(self, m1, m2):
-        pass
-
     # Section: Getting and Writing files
     # Desc:    Actually returning or saving file data
 
