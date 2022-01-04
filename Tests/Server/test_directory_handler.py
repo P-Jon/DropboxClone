@@ -1,3 +1,4 @@
+import json
 import pytest
 
 import os
@@ -8,8 +9,11 @@ dir_prefix = os.getcwd()
 directory = dir_prefix + "\\Server\\test_dir"
 dir_handler = DirectoryHandler()
 
-dir_string = "{ \"files\": [ {\"filename\": \"file1.txt\", \"size\": 77, \"last_edit\": 1640464854.159165}, {\"filename\": \"file2.txt\", \"size\": 0, \"last_edit\": 1640464825.9357572}] }"
+dir_string = "{ \"files\": [ {\"filename\": \"file1.txt\", \"size\": 77, \"last_edit\": 1640919720.8362603}, {\"filename\": \"file2.txt\", \"size\": 0, \"last_edit\": 1640919720.8372598}] }"
 dir_files = ['file1.txt', 'file2.txt']
+
+files_json = "{\"files\": [[\"file1.txt\", \"This is intended to be a file used for testing the serverside directory code.\", 1641277099.040298, 1640919720.8362603], [\"file2.txt\", \"\", 1640919720.8372598, 1640919720.8372598]]}"
+file2_json = ['file2.txt', '', 1640919720.8372598, 1640919720.8372598]
 
 def test_get_metadata():
     assert dir_handler.get_file_metadata(directory) == dir_string
@@ -29,27 +33,12 @@ def test_similarity_true():
 def test_similarity_false():
     assert dir_handler.detect_change(f1,f3) == False
 
-def test_get_file_filename():
+def test_get_file():
     file = dir_handler.get_file(directory, "file2.txt")
-    assert file[0] == "file2.txt"
+    assert file == file2_json
 
-def test_get_all_files_filename():
+def test_get_all_files():
     files = dir_handler.get_files(directory)
+    f_json = json.loads(files)
+    files = f_json.get("files")
     assert files[0][0] == "file1.txt"
-
-
-# Uncertain if there is a proper method for testing if the binary was correctly saved...
-# So will just replicate the code and check for a match without wrangling the data into structures
-def test_get_file_binary():
-    file = dir_handler.get_file(directory, "file2.txt")
-    test_file = None
-    with open(directory + "\\file2.txt", "rb") as fp:
-                test_file = fp.read()
-    assert file[1] is not None and file[1] == test_file
-
-def test_get_all_files_binary():
-    files = dir_handler.get_files(directory)
-    test_file = None
-    with open(directory + "\\file1.txt", "rb") as fp:
-                test_file = fp.read()
-    assert files[0][1] is not None and files[0][1] == test_file
