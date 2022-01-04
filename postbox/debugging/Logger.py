@@ -11,4 +11,4 @@ class Logger():
 
     def msg(self, message):
         if (self.debug_mode):
-            print(message)
+            print("[DEBUG] " + message)

@@ -100,15 +100,16 @@ class ClientRepository():
             self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
 
     def delete_files(self, files):
-        print(json.dumps({'filenames':files}))
+        '''
+        [POST] Send list of files from client to server to delete files on server.
+        '''
+        self.logger.msg("Removing files: " + json.dumps({'filenames':files}))
         r = requests.post(self.api_addr + "remove_multiple_files", json=json.dumps({'filenames':files}))
 
         if (r.status_code == 200):
             self.logger.msg("Removed files from server")
         else:
             self.logger.msg("Something went wrong when removing files from server")
-        pass
-
 
     def check_deleted_files(self, m1, m2):
         '''
