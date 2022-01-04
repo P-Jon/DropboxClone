@@ -3,6 +3,7 @@ from os import remove
 import requests
 
 from datetime import datetime, timezone
+from postbox.helper.DataHandler import DataHandler
 
 from postbox.helper.DirectoryHandler import DirectoryHandler
 from postbox.debugging.Logger import Logger
@@ -135,7 +136,9 @@ class ClientRepository():
         pass
 
     def get_client_metadata(self):
-        return self.dir_handler.local_get_file_metadata(self.directory)
+        metadata = self.dir_handler.get_file_metadata(self.directory)
+        metadata = json.loads(metadata)
+        return DataHandler.strip_metadata_from_json(metadata)
 
     def get_server_metadata(self):
         r = requests.get(self.api_addr + "server_dir_metadata")
@@ -143,8 +146,7 @@ class ClientRepository():
             self.logger.msg("Got server metadata")
             json_metadata = r.json()
             file_metadata = json.loads(json_metadata)
-            file_metadata = file_metadata.get("files")
-            return file_metadata
+            return DataHandler.strip_metadata_from_json(file_metadata)
         else:
             self.logger.msg("Failed to get server metadata")
             return None
