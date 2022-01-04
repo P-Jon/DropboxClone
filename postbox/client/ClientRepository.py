@@ -24,6 +24,7 @@ class ClientRepository():
         self.logger = Logger()
         self.dir_handler = DirectoryHandler()
         self.load_config()
+        self.initial_synchronise()
 
     def load_config(self):
         yaml_handler = yh()
@@ -57,17 +58,23 @@ class ClientRepository():
             print("No configuration found...")
         print("\n----------------------\n")
 
-    # Going to ensure the server is up-to-date with the client
+    # Going to ensure the server is largely up-to-date with the client
     def initial_synchronise(self):
         '''
         Ensuring the server is up to date with the client upon the client joining/re-joining.
         Any files present on the server, but not on the clientside for example will be deleted.
         '''
+        self.logger.msg("Performing initial synchronise...\n")
         local_metadata = self.get_client_metadata()
         server_metadata = self.get_server_metadata()
-        pass
 
-    # https://docs.python-requests.org/en/latest/user/quickstart/#post-a-multipart-encoded-file
+        # Check for deletions, rectify accordingly:
+        self.check_deleted_files(local_metadata, server_metadata)
+
+        # Check if all the existing local metadata matches the corresponding server data
+        # Would be better use if having an efficient method to distinguish what we should be updating
+        self.check_metadata_similarity(local_metadata, server_metadata) 
+
     def request_files(self):
         '''
         [GET] Requesting files from server to save to client directory.
@@ -92,6 +99,17 @@ class ClientRepository():
         else:
             self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
 
+    def delete_files(self, files):
+        print(json.dumps({'filenames':files}))
+        r = requests.post(self.api_addr + "remove_multiple_files", json=json.dumps({'filenames':files}))
+
+        if (r.status_code == 200):
+            self.logger.msg("Removed files from server")
+        else:
+            self.logger.msg("Something went wrong when removing files from server")
+        pass
+
+
     def check_deleted_files(self, m1, m2):
         '''
         Checking if any files have been deleted from the directory
@@ -105,13 +123,17 @@ class ClientRepository():
             
             if found != True:
                 removed_files.append(source_file.filename)
-        
-        r = requests.post(self.api_addr + "remove_multiple_files", json=json.dumps({'filenames':removed_files}))
 
-        if (r.status_code == 200):
-            self.logger.msg("Removed files from server")
-        else:
-            self.logger.msg("Something went wrong when removing files from server")
+        if len(removed_files) > 0:
+            self.delete_files(removed_files)
+
+    def check_metadata_similarity(self, m1, m2):
+        for m1_file in m1:
+            for m2_file in m2:
+                if (m1_file.filename == m2_file.filename):
+                    if (m1_file.get_similarity(m2_file) == False):
+                        return False
+        return True
 
     def check_metadata_match(self, cached_metadata):
         '''
@@ -124,16 +146,7 @@ class ClientRepository():
             self.check_deleted_files(cached_metadata, metadata)
             return False
 
-        for cached_file in cached_metadata:
-            for file in metadata:
-                if (cached_file.filename == file.filename):
-                    if (cached_file.get_similarity(file) == False):
-                        return False
-
-        return True
-
-    def request_file_validation(self):
-        pass
+        return self.check_metadata_similarity(cached_metadata, metadata)
 
     def get_client_metadata(self):
         metadata = self.dir_handler.get_file_metadata(self.directory)
@@ -145,10 +158,7 @@ class ClientRepository():
         if (r.status_code == 200):
             self.logger.msg("Got server metadata")
             json_metadata = r.json()
-            file_metadata = json.loads(json_metadata)
-            return DataHandler.strip_metadata_from_json(file_metadata)
+            return DataHandler.strip_metadata_from_json(json_metadata)
         else:
             self.logger.msg("Failed to get server metadata")
             return None
-
-
