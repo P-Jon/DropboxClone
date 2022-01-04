@@ -16,12 +16,11 @@ class DirectoryHandler():
         Get a JSON payload of Metadata objects.
         '''
         file_metadata = []
-        metadata = self.local_get_file_metadata(dir)
+
         for file in listdir(dir):
             dir_path = path.join(dir, file)
             metadata = Metadata(file, path.getsize(dir_path), path.getmtime(dir_path))
-            file_metadata.append(metadata)
-            file_metadata.append(json.dumps(file.__dict__))
+            file_metadata.append(json.dumps(metadata.__dict__))
 
         file_metadata = "{ \"files\": [ "  + ', '.join(file_metadata) + "] }"
         return file_metadata
