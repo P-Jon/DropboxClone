@@ -42,3 +42,4 @@ def test_get_all_files():
     f_json = json.loads(files)
     files = f_json.get("files")
     assert files[0][0] == "file1.txt"
+    
