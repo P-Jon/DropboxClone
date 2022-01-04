@@ -1,5 +1,4 @@
 import json
-from os import remove
 import requests
 
 from datetime import datetime, timezone
@@ -69,11 +68,18 @@ class ClientRepository():
         server_metadata = self.get_server_metadata()
 
         # Check for deletions, rectify accordingly:
-        self.check_deleted_files(local_metadata, server_metadata)
+        flag = self.check_deleted_files(server_metadata, local_metadata)
+    
+        if flag:
+            server_metadata = self.get_server_metadata() # Lets refresh that data now some has been removed...
 
         # Check if all the existing local metadata matches the corresponding server data
         # Would be better use if having an efficient method to distinguish what we should be updating
-        self.check_metadata_similarity(local_metadata, server_metadata) 
+        is_current = self.check_metadata_match(server_metadata) 
+        if (is_current != True):
+            self.send_files()
+
+        self.logger.msg("Completed initial synchronisation\n")
 
     def request_files(self):
         '''
@@ -114,6 +120,7 @@ class ClientRepository():
     def check_deleted_files(self, m1, m2):
         '''
         Checking if any files have been deleted from the directory
+        Returns true if files have been deleted.
         '''
         removed_files = []
         for source_file in m1:
@@ -127,6 +134,9 @@ class ClientRepository():
 
         if len(removed_files) > 0:
             self.delete_files(removed_files)
+            return True
+        else:
+            return False
 
     def check_metadata_similarity(self, m1, m2):
         for m1_file in m1:
@@ -142,7 +152,6 @@ class ClientRepository():
         Returns true if it matches, false if not.
         '''
         metadata = self.get_client_metadata()
-
         if (len(cached_metadata) != len(metadata)):
             self.check_deleted_files(cached_metadata, metadata)
             return False
