@@ -1,12 +1,11 @@
 import json
-import pytest
 
 import os
 from postbox.models.Metadata import Metadata
 from postbox.helper.DirectoryHandler import DirectoryHandler
 
 dir_prefix = os.getcwd()
-directory = dir_prefix + "\\Server\\test_dir"
+directory = dir_prefix + "\\DirectoryHandling\\test_dir"
 dir_handler = DirectoryHandler()
 
 dir_string = "{ \"files\": [ {\"filename\": \"file1.txt\", \"size\": 77, \"last_edit\": 1640919720.8362603}, {\"filename\": \"file2.txt\", \"size\": 0, \"last_edit\": 1640919720.8372598}] }"
