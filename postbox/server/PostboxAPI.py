@@ -61,13 +61,13 @@ def upload_file(path):
 @app.route("/remove_file/<path:path>", methods=["POST"])
 def delete_file(path):
     server.remove_file(path)
-    return 200
+    return Response(status=200)
 
 @app.route("/remove_multiple_files", methods=["POST"])
 def delete_multiple_files():
     filenames = request.get_json()
     server.remove_files(filenames)
-    return 200
+    return Response(status=200)
 
 # Error Handling
 @app.errorhandler(404)
