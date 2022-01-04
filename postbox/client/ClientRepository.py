@@ -1,3 +1,5 @@
+import json
+from os import remove
 import requests
 
 from datetime import datetime, timezone
@@ -54,6 +56,16 @@ class ClientRepository():
             print("No configuration found...")
         print("\n----------------------\n")
 
+    # Going to ensure the server is up-to-date with the client
+    def initial_synchronise(self):
+        '''
+        Ensuring the server is up to date with the client upon the client joining/re-joining.
+        Any files present on the server, but not on the clientside for example will be deleted.
+        '''
+        local_metadata = self.get_client_metadata()
+        server_metadata = self.get_server_metadata()
+        pass
+
     # https://docs.python-requests.org/en/latest/user/quickstart/#post-a-multipart-encoded-file
     def request_files(self):
         '''
@@ -79,14 +91,39 @@ class ClientRepository():
         else:
             self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
 
-    def check_metadata_match(self, cached):
+    def check_deleted_files(self, m1, m2):
+        '''
+        Checking if any files have been deleted from the directory
+        '''
+        removed_files = []
+        for source_file in m1:
+            found = False
+            for file in m2:
+                if source_file.filename == file.filename:
+                    found = True
+            
+            if found != True:
+                removed_files.append(source_file.filename)
+        
+        r = requests.post(self.api_addr + "remove_multiple_files", json=json.dumps({'filenames':removed_files}))
+
+        if (r.status_code == 200):
+            self.logger.msg("Removed files from server")
+        else:
+            self.logger.msg("Something went wrong when removing files from server")
+
+    def check_metadata_match(self, cached_metadata):
         '''
         Checking if the cached metadata matches the current metadata.
         Returns true if it matches, false if not.
         '''
         metadata = self.get_client_metadata()
 
-        for cached_file in cached:
+        if (len(cached_metadata) != len(metadata)):
+            self.check_deleted_files(cached_metadata, metadata)
+            return False
+
+        for cached_file in cached_metadata:
             for file in metadata:
                 if (cached_file.filename == file.filename):
                     if (cached_file.get_similarity(file) == False):
@@ -101,4 +138,15 @@ class ClientRepository():
         return self.dir_handler.local_get_file_metadata(self.directory)
 
     def get_server_metadata(self):
-        pass
+        r = requests.get(self.api_addr + "server_dir_metadata")
+        if (r.status_code == 200):
+            self.logger.msg("Got server metadata")
+            json_metadata = r.json()
+            file_metadata = json.loads(json_metadata)
+            file_metadata = file_metadata.get("files")
+            return file_metadata
+        else:
+            self.logger.msg("Failed to get server metadata")
+            return None
+
+
