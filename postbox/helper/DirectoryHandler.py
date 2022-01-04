@@ -1,6 +1,6 @@
 import json
 
-from os import listdir, path, utime
+from os import listdir, path, utime, remove
 from postbox.models.Metadata import Metadata
 
 class DirectoryHandler():
@@ -104,10 +104,20 @@ class DirectoryHandler():
             self.write_file(dir, file)
         return 200
 
+    # https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder-in-python
     def remove_file(self, dir, filename):
-        pass
+        try:
+            remove(path.join(dir,filename))
+        except OSError as e:  
+             print ("Error: %s - %s." % (e.filename, e.strerror))
 
     def remove_files(self, dir, filenames):
+        '''
+        Removing a list of filenames from the desired directory.
+        Expecting a JSON payload.
+        '''
+        filenames = json.loads(filenames)
         filenames = filenames.get("filenames")
 
-        pass
+        for file in filenames:
+            self.remove_file(dir, file)
