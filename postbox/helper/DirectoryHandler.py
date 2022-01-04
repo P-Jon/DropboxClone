@@ -1,7 +1,6 @@
 import json
-import base64
 
-from os import listdir, path, utime
+from os import listdir, path, utime, remove
 from postbox.models.Metadata import Metadata
 
 class DirectoryHandler():
@@ -13,6 +12,9 @@ class DirectoryHandler():
         pass
 
     def get_file_metadata(self, dir):
+        '''
+        Get a JSON payload of Metadata objects.
+        '''
         file_metadata = []
 
         for file in listdir(dir):
@@ -38,10 +40,16 @@ class DirectoryHandler():
         '''
         return f1.get_similarity(f2)
 
+    def compare_metadata(self, m1, m2):
+        pass
+
     # Section: Getting and Writing files
     # Desc:    Actually returning or saving file data
 
     def get_file(self, dir, filename):
+        '''
+        Get file data from directory, returns the filename, file data, access time and last edit time.
+        '''
         file = None
         p = path.join(dir, filename)
 
@@ -57,6 +65,10 @@ class DirectoryHandler():
     # Going to grab all the files and then let the API interface handle
     # transforming it to send.
     def get_files(self, dir):
+        '''
+        Get list of files from directory, returns the filename, file data, access time and last edit time.
+        JSON payload format.
+        '''
         files = []
         for filename in listdir(dir):
                 file = self.get_file(dir,filename)
@@ -65,6 +77,9 @@ class DirectoryHandler():
         return json.dumps({'files':files})
 
     def write_file(self, dir, file):
+        '''
+        Writing file to desired directory
+        '''
         filename = file[0]
         p = path.join(dir, filename)
         with open(p, "wb") as fp:
@@ -79,7 +94,30 @@ class DirectoryHandler():
         return 200    
 
     def write_files(self, dir, files):
+        '''
+        Writing a list of files to the desired directory.
+        Expecting a JSON payload.
+        '''
+        files = json.loads(files)
         files = files.get("files")
         for file in files:
             self.write_file(dir, file)
         return 200
+
+    # https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder-in-python
+    def remove_file(self, dir, filename):
+        try:
+            remove(path.join(dir,filename))
+        except OSError as e:  
+             print ("Error: %s - %s." % (e.filename, e.strerror))
+
+    def remove_files(self, dir, filenames):
+        '''
+        Removing a list of filenames from the desired directory.
+        Expecting a JSON payload.
+        '''
+        filenames = json.loads(filenames)
+        filenames = filenames.get("filenames")
+
+        for file in filenames:
+            self.remove_file(dir, file)

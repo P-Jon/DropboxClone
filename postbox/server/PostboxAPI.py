@@ -11,37 +11,6 @@ server = Server()
 def default_route():
     return "<p> Default Route </p>"
 
-# Validation Routes
-## Checking if the data from the client matches that of the server
-
-@app.route("/validate_directories", methods=["GET", "POST"])
-def validate_directory_contents():
-     ''' 
-     [POST] Expecting data from a list of files
-     Arguments:
-     file_list: Data regarding all files in source directory.
-     [GET] Returns: Format of [[entry, FILESTATE], [entry,FILESTATE], . . .] as to whether it is current or not.
-     '''
-     if request.method == "GET":
-         return "GET INV",200
-     else:
-         return "<p> VD Route </p>",200
-
-@app.route("/validate_file/<path:path>", methods=["GET", "POST"])
-def validate_file_contents(path):
-    ''' 
-    [POST] 
-    Expecting data from a single file
-    Arguments:
-    file: Data regarding target file in source directory.
-    [GET] 
-    Returns: true if file is current, false if not.
-    '''
-    if request.method == "GET":
-        return "<p> GET </p>"
-    else:
-        return "<p> VF Route </p>"
-
 # Metadata
 @app.route("/server_dir_metadata", methods=["GET"])
 def get_server_dir_metadata():
@@ -81,8 +50,8 @@ def upload_multiple_files():
     #files[0].filename
     return "<p> UM Files </p>", 201
 
-@app.route("/upload_file", methods=["POST"])
-def upload_file():
+@app.route("/upload_file/<path:path>", methods=["POST"])
+def upload_file(path):
     '''
     Sending a file to the server to update or upload (C)R(U)D to the directory.
     '''
@@ -91,11 +60,14 @@ def upload_file():
 # Destroy Routes
 @app.route("/remove_file/<path:path>", methods=["POST"])
 def delete_file(path):
-     return None
+    server.remove_file(path)
+    return Response(status=200)
 
 @app.route("/remove_multiple_files", methods=["POST"])
 def delete_multiple_files():
-     return None
+    filenames = request.get_json()
+    server.remove_files(filenames)
+    return Response(status=200)
 
 # Error Handling
 @app.errorhandler(404)

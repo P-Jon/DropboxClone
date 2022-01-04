@@ -1,4 +1,3 @@
-import json
 from postbox.debugging.Logger import Logger
 from postbox.helper.DirectoryHandler import DirectoryHandler
 from postbox.helper.YAMLHandler import YAMLHandler
@@ -40,10 +39,15 @@ class Server():
     def save_file(self, file):
         self.logger.msg(f"Writing file to dir: {self.directory}")
         self.dir_handler.write_file(self.directory, file)
-        return 200
 
     def save_files(self, files):
         self.logger.msg(f"Saving files...")
-        print(files)
-        self.dir_handler.write_files(self.directory, json.loads(files))
-        return 200
+        self.dir_handler.write_files(self.directory, files)
+
+    def remove_file(self, filename):
+        self.logger.msg(f"Removing file '{filename}' from server.")
+        self.dir_handler.remove_file(self.directory, filename)
+
+    def remove_files(self, filenames):
+        self.logger.msg("Removing files from server")
+        self.dir_handler.remove_files(self.directory, filenames)
