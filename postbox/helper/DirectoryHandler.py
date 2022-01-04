@@ -64,7 +64,7 @@ class DirectoryHandler():
         Get list of files from directory, returns the filename, file data, access time and last edit time.
         JSON payload format.
         '''
-        return self.get_files_by_filenames(listdir(dir))
+        return self.get_files_by_filenames(dir, listdir(dir))
 
     def get_files_by_filenames(self, dir, filenames):
         '''

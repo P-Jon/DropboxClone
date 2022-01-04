@@ -75,9 +75,12 @@ class ClientRepository():
 
         # Check if all the existing local metadata matches the corresponding server data
         # Would be better use if having an efficient method to distinguish what we should be updating
-        is_current = self.check_metadata_match(server_metadata) 
+        is_current, filenames = self.check_metadata_match(server_metadata) 
         if (is_current != True):
-            self.send_files()
+            if (len(filenames) > 0):
+                self.send_files(filenames)
+            else:
+                self.send_all_files()
 
         self.logger.msg("Completed initial synchronisation\n")
 
@@ -94,16 +97,28 @@ class ClientRepository():
         else:
             self.logger.msg(f"Fails failed to be retrieved: HTTP {r.status_code}")
 
-    def send_files(self):
-        '''
-        [POST] Send files from client to server to be saved on the server.
-        '''
-        files = self.dir_handler.get_files(self.directory)
+    def network_send_files(self, files):
         r = requests.post(self.api_addr + "upload_multiple_files", json=files)
         if (r.status_code == 201):
             self.logger.msg("Send files was successful")
         else:
             self.logger.msg(f"Send files was not successful: HTTP {r.status_code}")
+
+    def send_all_files(self):
+        '''
+        [POST] Send all files from client to server to be saved on the server.
+        '''
+        files = self.dir_handler.get_files(self.directory)
+        self.network_send_files(files)
+
+    def send_files(self, filenames):
+        '''
+        [POST] Send specified files from client to server to be saved on the server.
+        '''
+        files = self.dir_handler.get_files_by_filenames(self.directory, filenames)
+        self.logger.msg(f"Sending specified files for upload: {files}")
+        self.network_send_files(files)
+        
 
     def delete_files(self, files):
         '''
@@ -139,12 +154,15 @@ class ClientRepository():
             return False
 
     def check_metadata_similarity(self, m1, m2):
+        filenames = []
+        flag = True
         for m1_file in m1:
             for m2_file in m2:
                 if (m1_file.filename == m2_file.filename):
                     if (m1_file.get_similarity(m2_file) == False):
-                        return False
-        return True
+                        flag = True
+                        filenames.append(m1_file.filename)      
+        return flag, filenames
 
     def check_metadata_match(self, cached_metadata):
         '''
@@ -154,7 +172,7 @@ class ClientRepository():
         metadata = self.get_client_metadata()
         if (len(cached_metadata) != len(metadata)):
             self.check_deleted_files(cached_metadata, metadata)
-            return False
+            return False, []
 
         return self.check_metadata_similarity(cached_metadata, metadata)
 

@@ -30,12 +30,15 @@ class Client():
 
         while(True):
             self.timer(wait_time)
-            check_match = self.repository.check_metadata_match(self.cached_metadata)
+            check_match, filenames = self.repository.check_metadata_match(self.cached_metadata)
             if (check_match == False):
                 print("\nChange in directory detected")
                 self.repository.present_directory()
                 self.cached_metadata = self.repository.get_client_metadata()
-                self.repository.send_files()
+                if (len(filenames) > 0):
+                    self.repository.send_files(filenames)
+                else:
+                    self.repository.send_all_files()
                 wait_time = 20
             else:
                 if (wait_time <= max_time):
