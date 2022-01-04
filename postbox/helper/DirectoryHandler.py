@@ -59,18 +59,21 @@ class DirectoryHandler():
         else:
             return None
 
-    # Going to grab all the files and then let the API interface handle
-    # transforming it to send.
     def get_files(self, dir):
         '''
         Get list of files from directory, returns the filename, file data, access time and last edit time.
         JSON payload format.
         '''
+        return self.get_files_by_filenames(listdir(dir))
+
+    def get_files_by_filenames(self, dir, filenames):
+        '''
+        '''
         files = []
-        for filename in listdir(dir):
-                file = self.get_file(dir,filename)
-                if file is not None:
-                    files.append(file)
+        for filename in filenames:
+            file = self.get_file(dir,filename)
+            if file is not None:
+                files.append(file)
         return json.dumps({'files':files})
 
     def write_file(self, dir, file):
