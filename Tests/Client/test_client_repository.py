@@ -18,6 +18,8 @@ metadata_unmatch = []
 metadata_unmatch.append(Metadata("f1.txt", 1, 0))
 metadata_unmatch.append(Metadata("f3.txt", 1, 0))
 
+metadata_new_files = metadata_match_1[:]
+metadata_new_files.append(Metadata("new.txt", 50, 30))
 
 # Similar meaning of the same length, disimilar meaning not of the same length.
 def test_check_metadata_true_similar():
@@ -50,4 +52,12 @@ def test_check_deleted_files_false():
     flag = False
     if len(files) > 0:
         flag = True
+    assert flag == False
+
+def test_check_new_files_true():
+    flag, files = client_repo.check_new_file_data(metadata_match_1, metadata_new_files)
+    assert flag == True and files[0] == 'new.txt'
+
+def test_check_new_files_false():
+    flag, files = client_repo.check_new_file_data(metadata_match_1, metadata_match_2)
     assert flag == False

@@ -146,7 +146,7 @@ class ClientRepository():
                 print(f"M1: {source_file.filename}, M2: {file.filename}")
                 if source_file.filename == file.filename:
                     found = True
-                    #break
+                    break
             
             if found != True:
                 removed_files.append(source_file.filename)
@@ -194,15 +194,18 @@ class ClientRepository():
         metadata = self.get_client_metadata()
         return self.check_metadata_match(cached_metadata, metadata)
 
+    def check_new_file_data(self, cached_metadata, metadata):
+        flag, files = self.check_metadata_match(metadata, cached_metadata)
+        flag = not flag # Inverting to get a sensical output flag
+        return flag, files
+
     def check_new_files(self, cached_metadata):
         '''
         Checking if new files have entered the directory,
         Returns true if they have, false if they have not.
         '''
         metadata = self.get_client_metadata()
-        flag, files = self.check_metadata_match(metadata, cached_metadata)
-        flag = not flag # Inverting to get a sensical output flag
-        return flag, files
+        return self.check_new_file_data(cached_metadata, metadata)
 
     def get_client_metadata(self):
         metadata = self.dir_handler.get_file_metadata(self.directory)
