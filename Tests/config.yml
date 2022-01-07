@@ -1,1 +1,3 @@
 source_directory: "C:\\ServerFilesystem"
+api_addr: http://127.0.0.1:5000
+debug_mode: True

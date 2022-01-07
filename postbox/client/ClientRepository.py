@@ -143,8 +143,10 @@ class ClientRepository():
         for source_file in m1:
             found = False
             for file in m2:
+                print(f"M1: {source_file.filename}, M2: {file.filename}")
                 if source_file.filename == file.filename:
                     found = True
+                    #break
             
             if found != True:
                 removed_files.append(source_file.filename)
