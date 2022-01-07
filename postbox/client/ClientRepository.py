@@ -22,6 +22,8 @@ class ClientRepository():
         self.config_set = False
         self.logger = Logger()
         self.dir_handler = DirectoryHandler()
+        
+    def setup(self):
         self.load_config()
         self.initial_synchronise()
 
@@ -68,14 +70,14 @@ class ClientRepository():
         server_metadata = self.get_server_metadata()
 
         # Check for deletions, rectify accordingly:
-        flag = self.check_deleted_files(server_metadata, local_metadata)
+        deleted_files = self.check_deleted_files(server_metadata, local_metadata)
     
-        if flag:
+        if len(deleted_files) > 0:
+            self.delete_files(deleted_files)
             server_metadata = self.get_server_metadata() # Lets refresh that data now some has been removed...
 
-        # Check if all the existing local metadata matches the corresponding server data
-        # Would be better use if having an efficient method to distinguish what we should be updating
-        is_current, filenames = self.check_metadata_match(server_metadata) 
+        is_current, filenames = self.check_metadata_similarity(local_metadata, server_metadata)
+
         if (is_current != True):
             if (len(filenames) > 0):
                 self.send_files(filenames)
@@ -148,33 +150,47 @@ class ClientRepository():
                 removed_files.append(source_file.filename)
 
         if len(removed_files) > 0:
-            self.delete_files(removed_files)
-            return True
+            return removed_files
         else:
-            return False
+            return []
 
     def check_metadata_similarity(self, m1, m2):
         filenames = []
         flag = True
         for m1_file in m1:
+            file_exists = False
             for m2_file in m2:
+                #self.logger.msg(f"M1: {m1_file.filename}, M2: {m2_file.filename}")
                 if (m1_file.filename == m2_file.filename):
+                    file_exists = True
                     if (m1_file.get_similarity(m2_file) == False):
-                        flag = True
-                        filenames.append(m1_file.filename)      
+                        flag = False
+                        filenames.append(m1_file.filename)
+                    break  
+            if (file_exists == False):
+                flag = False
+                filenames.append(m1_file.filename)   
         return flag, filenames
 
-    def check_metadata_match(self, cached_metadata):
+    # Exists to be invoked by unit test
+    def check_metadata_match(self, cached_metadata, metadata):
+        return self.check_metadata_similarity(cached_metadata, metadata)
+
+    def check_deletions(self, cached_metadata):
+        metadata = self.get_client_metadata()
+        return self.check_deleted_files(cached_metadata, metadata)
+
+    def check_metadata(self, cached_metadata):
         '''
         Checking if the cached metadata matches the current metadata.
         Returns true if it matches, false if not.
         '''
         metadata = self.get_client_metadata()
-        if (len(cached_metadata) != len(metadata)):
-            self.check_deleted_files(cached_metadata, metadata)
-            return False, []
+        return self.check_metadata_match(cached_metadata, metadata)
 
-        return self.check_metadata_similarity(cached_metadata, metadata)
+    def check_new_files(self, cached_metadata):
+        metadata = self.get_client_metadata()
+        return self.check_metadata_match(metadata, cached_metadata)
 
     def get_client_metadata(self):
         metadata = self.dir_handler.get_file_metadata(self.directory)
