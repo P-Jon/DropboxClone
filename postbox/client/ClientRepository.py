@@ -177,6 +177,10 @@ class ClientRepository():
         return self.check_metadata_similarity(cached_metadata, metadata)
 
     def check_deletions(self, cached_metadata):
+        '''
+        Checking if the cached metadata has since had removed files.
+        Returns a non-empty list if it has, a list with filenames if not.
+        '''
         metadata = self.get_client_metadata()
         return self.check_deleted_files(cached_metadata, metadata)
 
@@ -189,8 +193,14 @@ class ClientRepository():
         return self.check_metadata_match(cached_metadata, metadata)
 
     def check_new_files(self, cached_metadata):
+        '''
+        Checking if new files have entered the directory,
+        Returns true if they have, false if they have not.
+        '''
         metadata = self.get_client_metadata()
-        return self.check_metadata_match(metadata, cached_metadata)
+        flag, files = self.check_metadata_match(metadata, cached_metadata)
+        flag = not flag # Inverting to get a sensical output flag
+        return flag, files
 
     def get_client_metadata(self):
         metadata = self.dir_handler.get_file_metadata(self.directory)

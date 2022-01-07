@@ -46,6 +46,7 @@ class Client():
         while(True):
             self.timer(wait_time)
             increment_timer = True
+            
             deleted_files = self.repository.check_deletions(self.cached_metadata)
             if len(deleted_files) > 0:
                 self.repository.delete_files(deleted_files)
@@ -53,7 +54,7 @@ class Client():
                 increment_timer = False
 
             new_flag, filenames = self.repository.check_new_files(self.cached_metadata)
-            if (new_flag == False):
+            if (new_flag):
                 self.send_files_procedure(filenames)
                 wait_time = 20
                 increment_timer = False
@@ -63,7 +64,7 @@ class Client():
                 self.send_files_procedure(filenames)
                 wait_time = 20
                 increment_timer = False
-                
+
             if (increment_timer):
                 if (wait_time <= max_time):
                     wait_time += backoff_increment
